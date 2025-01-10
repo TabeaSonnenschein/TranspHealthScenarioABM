@@ -93,6 +93,36 @@ cd <this-repo>
 ```
 
 ---
+## Input Data
+
+| **Input Data**          | **Location**                                 | **Content**                                                     | **Key Variables / Notes**                                                                 |
+|-------------------------|----------------------------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| **Synthetic Population**| `Population/Agent_pop_clean*.csv`           | Complete or subsetted list of synthetic agents.                 | Demographic attributes, car ownership, education, etc.                                     |
+| **Activity Schedules**  | `ActivitySchedules/HETUS2010_Synthpop_*.csv` | Schedules for each day of the week from HETUS 2010 database.    | 144 segments per day (10-min intervals), activity codes for work, school, leisure, etc.   |
+| **Spatial Extent**      | `SpatialData/SpatialExtent.feather`          | Polygon / boundary for the entire simulation area.              | Defines bounding box for x/y coordinates (EPSG:28992).                                     |
+| **Residences**          | `SpatialData/Residences.feather`            | Locations of residential buildings (points or polygons).        | Used to assign home location for each agent.                                              |
+| **Schools, Universities** | `SpatialData/Schools.feather`, `SpatialData/Universities.feather` | Educational facilities (points). | Used for agents’ school/university destinations.                                          |
+| **Supermarkets, Shops** | `SpatialData/Supermarkets.feather`, `SpatialData/ShopsnServ.feather` | Commercial amenities (points). | Agents’ shopping destinations, influences trip purpose.                                   |
+| **Entertainment**       | `SpatialData/Entertainment.feather`         | Cultural or leisure destinations (points).                      | Used in scenario-based leisure trips.                                                     |
+| **Kindergardens**       | `SpatialData/Kindergardens.feather`         | Childcare or kindergarten locations.                            | For “bring person” or childcare-related trips.                                            |
+| **Road Network**        | `SpatialData/carroads.feather` and `SpatialData/Streets.feather` | Road & street geometries.                                       | Used for traffic assignment & OSRM routing references.                                     |
+| **Greenspace**          | `SpatialData/GreenspaceCentroids.feather`   | Green space centroids (points).                                 | Outdoor / sports activities.                                                              |
+| **Environmental Determinants** | `SpatialData/EnvBehavDeterminants.feather` | Additional built-environment data layers.    | E.g., population density, retail density, parking fees, or scenario adjustments.          |
+| **Air Pollution Baseline** | `AirPollutionModelData/Pred_50mTrV_TrI_noTrA.csv` | Baseline NO2 per 50m grid cell.               | Used by the dispersion model as a starting value.                                         |
+| **Weather Data**        | `Weather/monthlyWeather2019TempDiff.csv`    | Temperature, rainfall, wind speed/direction (monthly).          | Affects mode choice & dispersion.                                                         |
+| **Traffic Remainder**   | `TrafficRemainder/AirPollGrid_HourlyTraffRemainder_XXXX.csv` | Pre-calculated correction factors (if used). | For “remainder” traffic scenario, adjusting assigned vs. observed traffic.                |
+
+
+## Input Models
+
+| **Model**                       | **Location**                                          | **Purpose**                                                             | **Notes / Key Variables**                                                                                                                   |
+|--------------------------------|-------------------------------------------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Mode Choice Model (PMML)**   | `ModalChoiceModel/RandomForest.pmml`                  | Predicts agent’s travel mode (bike, drive, walk, transit).              | Uses scikit-learn’s `PMMLForestClassifier` with features like distance, personal demographics, environmental variables, and weather.          |
+| **Mode Choice Feature Order**   | `ModalChoiceModel/RFfeatures.txt`                    | Defines order of predictor variables for the RandomForest PMML.         | Must match the PMML’s input schema.                                                                                                            |
+| **Hybrid Dispersion Model**     | `CellAutDisp.py` and `AirPollutionModelData/*`        | Propagates NO2 from on-road traffic sources across the grid.            | Includes baseline concentrations, morphological factors (height, green cover), and local wind patterns.                                       |
+| **Weight Matrix & Parameters**  | `AirPollutionModelData/optimalparams_50m_*.json`      | Contains pre-calibrated or optimized parameters for dispersion.         | Example includes scaling factors, morphological adjustments, and meteorological repeats.                                                       |
+| **OSRM Routing Profiles**       | N/A (external OSRM server or `.bat` file to start OSRM) | Provides route calculations for “car”, “bike”, “foot” (and transit).    | The script queries local OSRM servers via HTTP. Must be running on ports 5000, 5001, 5002.                                                     |
+
 
 ## 4. Required Data & Folder Structure
 
