@@ -152,6 +152,23 @@ D:/PhD EXPANSE/Data/Amsterdam/ABMRessources/ABMData/
 
 ---
 
+## ABM Output Folders and File Contents
+
+Each model run creates folders within each location named after the **modelrun** and the **number of agents** used. The table below summarizes the key output types, folder locations, and their main variables:
+
+| **Output Type**                     | **Location**                                                | **Content**                                                                              | **Variables**                                                                        |
+|-------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| **Synthetic Population Sample**     | `ModelRuns/(nr agents) Agents`                             | The sample of the population used in the simulation                                      | All synthetic population variables                                                   |
+| **Residences**                      | `ModelRuns/(nr agents) Agents`                             | The residential coordinates of the specific population                                    | `AgentID`, residence coordinates                                                     |
+| **Exposure**                        | `ModelRuns/(nr agents) Agents/AgentExposure/(modelrun)`     | Personal exposure estimates for each agent per hour                                      | `AgentID`, `NO2`, `NO2wFilter`, `MET`, `indoortime`                                  |
+| **NO2**                             | `ModelRuns/(nr agents) Agents/NO2/(modelrun)`               | Hourly NO2 concentrations per grid cell, saved per day                                   | `GridID`, NO2 concentrations per hour                                               |
+| **Traffic**                         | `ModelRuns/(nr agents) Agents/Traffic/(modelrun)`           | Traffic Volume and Count per grid cell per hour                                          | `GridID`, Traffic Volume per hour, Traffic Count per hour                           |
+| **ModalSplit**                      | `ModelRuns/(nr agents) Agents/ModalSplit/(modelrun)`        | Modal Split per hour (number of people traveling by specific modes)                      | Drive trip counts, Bike trip counts, Walk trip counts, Public Transport trip counts |
+| **Tracks**                          | `ModelRuns/(nr agents) Agents/Tracks/(modelrun)`            | Each agent’s tracks per hour                                                             | `AgentID`, list of trip geometries, list of corresponding modes, trip durations     |
+
+
+
+
 ## 5. Usage
 
 1. **Edit** the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run.
