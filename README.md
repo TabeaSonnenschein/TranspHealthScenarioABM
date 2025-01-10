@@ -275,24 +275,14 @@ During (and after) the run, the script writes:
 ---
 
 ## 12. License
-
-(This script is provided without an explicit license in the snippet. If you wish to make it open-source, you can include an MIT or GPL license statement here. For example:)
-
-```
-MIT License
-
-Copyright (c) 2023 ...
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software ...
-```
-
----
+This project is licensed under the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ## 13. Contact
 
 For questions, suggestions, or further collaboration, please reach out to:
-- **Name**: (e.g., John Doe)
-- **Email**: (e.g., john.doe@example.com)
-- **Affiliation**: (e.g., University / Research Group)
+- **Name**: Tabea Sonnenschein
+- **Email**: t.s.sonnenschein@uu.nl
+- **Affiliations**: Utrecht University, Institute for Risk Assessment Sciences & Human Geography and Spatial Planning; University Medical Center Utrecht, Julius Center, Exposome and Planetary Health Group.
 
 ---
 
