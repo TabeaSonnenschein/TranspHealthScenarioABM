@@ -148,6 +148,11 @@ def RetrieveAllTracksHour(agents, dum):
 def RetrieveModalSplitHour(agents, dum):
     return [agent.thishourmode  for agent in agents]
 
+def RetrieveResidence(agents, dum):
+    return [[agent.unique_id, agent.Residence]  for agent in agents]
+  
+
+
 class Humans(Agent):
     """
     Humans:
@@ -440,12 +445,25 @@ class Humans(Agent):
       orig_point = transform(project_to_WSG84, Point(tuple(self.pos)))
       dest_point = transform(project_to_WSG84, Point(tuple(self.destination_activity)))
       url = ("http://127.0.0.1" + server + "route/v1/"+ lua_profile + "/" + str(orig_point.x)+ ","+ str(orig_point.y)+ ";"+ str(dest_point.x)+ ","+ str(dest_point.y) + "?overview=full&geometries=polyline")
-      res = rq.get(url).json()
-      self.track_geometry = transform(projecy_to_crs, transform(Math_utils.flip, LineString(polyline.decode(res['routes'][0]['geometry']))))
-      self.track_duration = round((res['routes'][0]['duration'])/60)  # minutes
-      if self.modechoice == "transit":
-        self.track_duration =  round(self.track_duration/10,0)
-      self.trip_distance = res['routes'][0]['distance']  # meters
+      try:
+        res = rq.get(url, timeout = 5).json()
+        self.track_geometry = transform(projecy_to_crs, transform(Math_utils.flip, LineString(polyline.decode(res['routes'][0]['geometry']))))
+        self.track_duration = round((res['routes'][0]['duration'])/60)  # minutes
+        if self.modechoice == "transit":
+          self.track_duration = self.track_duration/10
+        self.trip_distance = res['routes'][0]['distance']  # meters
+      except (rq.exceptions.RequestException, KeyError, IndexError):
+        self.track_geometry = self.route_eucl_line
+        if self.modechoice == "walk":
+            traffspeed = 82  # speed in meters per minute in case OSRM fails
+        elif self.modechoice == "drive":
+            traffspeed = 500  
+        elif self.modechoice == "bike":
+            traffspeed = 250  
+        elif self.modechoice == "transit":
+            traffspeed = 300 
+        self.track_duration = self.trip_distance/ traffspeed      
+      pass
     
     def SavingRoute(self):
       if(self.former_activity in [5, 1, 6, 7]):
@@ -574,7 +592,7 @@ class Humans(Agent):
         # self.hourlytravelNO2 = sum(np.multiply([mean(val)*self.model.NO2filters[self.thishourmode[count]] if len(val)>0 else 0 for count, val in enumerate(trackjoin)], self.thishourduration))
         
         # Metabolic Equivalent of Task
-        self.hourlytravelMET = sum(np.multiply(list(map(lambda x: float(x.replace('bike', "6.8").replace('drive', "1.65").replace('walk', "3.5").replace('transit', "1.9")) , self.thishourmode))
+        self.hourlytravelMET = sum(np.multiply(list(map(lambda x: float(x.replace('bike', "5.8").replace('drive', "0.0").replace('walk', "2.5").replace('transit', "0.75")) , self.thishourmode))
                                                 , self.thishourduration))
         
     def ResetTravelTracks(self):
@@ -688,13 +706,16 @@ class TransportAirPollutionExposureModel(Model):
         st = time.time()
         with Pool(initializer=init_worker_init, initargs=(schedulelist, Residences, Universities, Schools, Profess, Supermarkets, greenspace, Kindergardens)) as pool:
             self.Humans = pool.starmap(Humans, [(random_subset.iloc[x],  self) for x in range(self.nb_humans)], chunksize=100) 
+            ResidenceCoords = pool.starmap(RetrieveResidence, [(Human, 0) for Human in np.array_split(self.Humans, n)], chunksize = 100)
             pool.close()
             pool.join()
             pool.terminate()
         for Human in self.Humans:
             self.continoussp.place_agent(Human, Human.Residence)
-        print("Human Init Time: ", time.time() - st, "Seconds")
+            
+        pd.DataFrame([item for items in ResidenceCoords for item in items], columns=['agent', 'ResidentialCoords']).to_csv(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/ResidentialCoords_{randomID}_A{nb_humans}_{modelname}.csv',index = False,quoting=csv.QUOTE_NONNUMERIC, float_format='%.15g')
 
+        print("Human Init Time: ", time.time() - st, "Seconds")
 
         # Load Weather data and set initial weather conditions
         self.monthly_weather_df = pd.read_csv(path_data+"Weather/monthlyWeather2019TempDiff.csv") 
@@ -937,11 +958,11 @@ if __name__ == "__main__":
     
     
     # Number of Humans
-    nb_humans = 43500     #87000 = 10%, 43500 = 5%, 21750 = 2.5%, 8700 = 1%
+    nb_humans = 21750     #87000 = 10%, 43500 = 5%, 21750 = 2.5%, 8700 = 1%
 
     # New Population sample or already existing one
     newpop = False
-    subsetnr = 1
+    subsetnr = 0
     
     # Length of the simulation run
     NrHours = 24
@@ -952,8 +973,8 @@ if __name__ == "__main__":
     starting_date = datetime(2019, 1, 1, 0, 0, 0)
     
     # Type of scenario
-    modelname = "StatusQuo" 
-    # modelname = "PrkPriceInterv"
+    # modelname = "StatusQuo" 
+    modelname = "PrkPriceInterv"
     # modelname = "15mCity"
     # modelname = "15mCityWithDestination"
     # modelname = "NoEmissionZone2025"
@@ -966,20 +987,21 @@ if __name__ == "__main__":
     profile = False
     
     # Stage of the Traffic Model
-    TraffStage = "PredictionR2" # "Remainder" or "Regression" or "PredictionNoR2" or "PredictionR2" 
+    TraffStage = "PredictionNoR2" # "Remainder" or "Regression" or "PredictionNoR2" or "PredictionR2" 
     
     
     # Traffic Model
     if nb_humans == 21750:
-      TraffVCoeff =  6.8583637     # 43500 = 3.7927303	21750 =  6.8583637	8700 = 7.214888208
+      TraffVCoeff =  6.8583637     # 43500 = 3.7927303	21750 =  6.8583637	
     elif nb_humans == 43500:
-      TraffVCoeff =  3.7927303      # 43500 =3.7927303	21750 =  6.8583637	8700 = 7.214888208
+      TraffVCoeff =  3.7927303      # 43500 =3.7927303	21750 =  6.8583637	
     
     TraffVNO2Coeff = 0.02845   # Traffic Volume NO2 coefficient for 50m cellsize
     TraffIntensNO2Coeff = 0.0001072 # Traffic Intensity NO2 coefficient for 50m cellsize
 
-    randomID = random.randint(0, 1000000)
-    print(modelname)
+    randomID = random.randint(0, 1000000)  # model run ID
+    print(modelname, randomID)
+    print("Popsample", subsetnr)
  
     
     #############################################################################################################
@@ -1080,9 +1102,6 @@ if __name__ == "__main__":
       Profess = gpd.read_feather(path_data+"SpatialData/Profess.feather")
     
 
-    # if modelname in ["NoEmissionZone2025", "NoEmissionZone2030"]:
-    #   NoEmissionZone = gpd.read_feather(path_data+f"SpatialData/{modelname}.feather")
-
     # Load Intervention Environment
     # Status Quo
     if modelname in ["StatusQuo","PrkPriceInterv", "NoEmissionZone2025", "NoEmissionZone2030"]:
@@ -1098,7 +1117,6 @@ if __name__ == "__main__":
     else:
       EnvBehavDeterms = gpd.read_feather(path_data+f"SpatialData/EnvBehavDeterminants{modelname}.feather")
 
- 
     # Read the Environmental Stressor Data and Model
     cellsize = "50m"
     suffix = "TrV_TrI_noTrA"
@@ -1133,25 +1151,21 @@ if __name__ == "__main__":
                                     NrTrees =  moderator_df["NrTrees"], building_height = moderator_df["building_height"], 
                                     neigh_height_diff = moderator_df["neigh_height_diff"])
 
-    # Preparing Data    
-    # TraffDat = pd.read_csv(path_data+ "Air Pollution Determinants//CellAutDisp_Data/AirPollRaster50m_TraffVdata.csv")
-    # TraffIntDat = pd.read_csv(path_data+ "Air Pollution Determinants//CellAutDisp_Data/AirPollRaster50m_TraffIntensdata.csv")
-    # AirPollGrid = AirPollGrid.merge(TraffDat[['int_id','StreetIntersectDensity', 'MaxSpeedLimit', 'MinSpeedLimit', 'MeanSpeedLimit']], how = "left", on = "int_id")
-
     if TraffStage in ["PredictionNoR2", "PredictionR2"]:
-      if modelname == "NoEmissionZone2025":
+      if modelname in ["NoEmissionZone2025", "PrkPriceInterv"]:
         TraffVrest = pd.read_csv(path_data+f"TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}_{modelname}.csv")
       else:
         TraffVrest = pd.read_csv(path_data+f"TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}.csv")
       AirPollGrid = AirPollGrid.merge(TraffVrest, how = "left", on = "int_id")
-        
+
+
     # Looking at Data
     print("AirPollGrid Columns: ", AirPollGrid.columns)
     print("AirPollGrid Shape: ", AirPollGrid.shape)    
     print("Moderator Columns: ", moderator_df.columns)
     print("AirPollRaster Shape: ", airpoll_grid_raster.shape)       
-    
-    # Start OSRM Servers
+
+      # Start OSRM Servers
     print("Starting OSRM Servers")
     subprocess.call([r"C:\Users\Tabea\Documents\GitHub\Spatial-Agent-based-Modeling-of-Urban-Health-Interventions\start_OSRM_Servers.bat"])
 
