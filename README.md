@@ -108,8 +108,7 @@ pip install -r requirements.txt
 ---
 
 ## 5. ABM Output File Contents
-
-Each model run creates folders within each location named after the **modelrun** and the **number of agents** used. The table below summarizes the key output types, folder locations, and their main variables:
+Within the directory `ABMData/ModelRuns/` each model run creates the following folders named after the **modelrun** and the **number of agents** used. The table below summarizes the key output types, folder locations, and their main variables:
 
 | **Output Type**                     | **Location**                                                | **Content**                                                                              | **Variables**                                                                        |
 |-------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
