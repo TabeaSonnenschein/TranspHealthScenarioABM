@@ -134,10 +134,11 @@ TransportAirpollutionScenarioABMs/ABMData/
 ├── Population/
 │   ├── Agent_pop_cleanElectricCarOwnership.csv  # for no-emission zone scenarios
 │   └── Amsterdam_population_subsetXXXX.csv       # pre-sampled population files
+│   └── ...
 │
 ├── ActivitySchedules/
-│   ├── HETUS2010_Synthpop_schedulesclean_Monday.csv
-│   ├── HETUS2010_Synthpop_schedulesclean_Tuesday.csv
+│   ├── Synthpop_schedulesclean_Monday.csv
+│   ├── Synthpop_schedulesclean_Tuesday.csv
 │   └── ...
 │
 ├── SpatialData/
