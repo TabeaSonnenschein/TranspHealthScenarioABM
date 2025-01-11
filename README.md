@@ -130,7 +130,7 @@ Each model run creates folders within each location named after the **modelrun**
 The script expects a certain file/folder layout under the variable `path_data`:
 
 ```
-D:/PhD EXPANSE/Data/Amsterdam/ABMRessources/ABMData/
+TransportAirpollutionScenarioABMs/ABMData/
 │
 ├── Population/
 │   ├── Agent_pop_cleanElectricCarOwnership.csv  # for no-emission zone scenarios
@@ -179,13 +179,14 @@ D:/PhD EXPANSE/Data/Amsterdam/ABMRessources/ABMData/
     └── ... 
 ```
 
-> **Note**: This structure is illustrated in the script. You may need to adapt `path_data` or directory names if you use different paths.
+> **Note**: This structure is illustrated in the script. You need to adapt `path_data` for the paths to the Repository.
 
 ---
 
 ## 7. Usage
 
-1. **Edit** the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run.
+1. **Set path to repository** : Set `path_data` to the path to the repository
+1. **Configure the Simulation Settings**: Edit the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run.
 2. **Ensure** OSRM servers are running. The script calls a batch file `start_OSRM_Servers.bat` to start local OSRM instances for `bike`, `car`, and `foot` profiles on ports `5001`, `5000`, and `5002`.  
    - You may need to adapt or create your own `.bat` scripts for your OSRM setup.
 3. **Run** the script:
