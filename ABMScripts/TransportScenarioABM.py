@@ -672,8 +672,8 @@ class Humans(Agent):
 
 class TransportAirPollutionExposureModel(Model):
     def __init__(self, nb_humans, path_data, crs="epsg:28992",
-                 starting_date=datetime(2019, 1, 1, 6, 50, 0), steps_minute=10):
-        super().__init__(nb_humans, path_data, crs, starting_date, steps_minute)
+                 starting_date=datetime(2019, 1, 1, 6, 50, 0), steps_minute=10, MonthsStep = 3):
+        super().__init__(nb_humans, path_data, crs, starting_date, steps_minute, MonthsStep)
         # Insert the global definitions, variables, and actions here
         self.path_data = path_data
         self.starting_datetime = starting_date
@@ -711,12 +711,12 @@ class TransportAirPollutionExposureModel(Model):
         for Human in self.Humans:
             self.continoussp.place_agent(Human, Human.Residence)
             
-        pd.DataFrame([item for items in ResidenceCoords for item in items], columns=['agent', 'ResidentialCoords']).to_csv(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/ResidentialCoords_{randomID}_A{nb_humans}_{modelname}.csv',index = False,quoting=csv.QUOTE_NONNUMERIC, float_format='%.15g')
+        pd.DataFrame([item for items in ResidenceCoords for item in items], columns=['agent', 'ResidentialCoords']).to_csv(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/ResidentialCoords_{randomID}_A{nb_humans}_{modelname}.csv',index = False,quoting=csv.QUOTE_NONNUMERIC, float_format='%.15g')
 
         print("Human Init Time: ", time.time() - st, "Seconds")
 
         # Load Weather data and set initial weather conditions
-        self.monthly_weather_df = pd.read_csv(path_data+"Weather/monthlyWeather2019TempDiff.csv") 
+        self.monthly_weather_df = pd.read_csv(path_data+"ABMData/Weather/monthlyWeather2019TempDiff.csv") 
         #self.daily_weather_df = pd.read_csv("D:/PhD EXPANSE/Data/Amsterdam/Weather/dailyWeather2019.csv")
         self.WeatherVars = list(self.monthly_weather_df[["Temperature","Rain","Windspeed","Winddirection"]].loc[self.monthly_weather_df["month"]== self.current_datetime.month].values[0])
         print("temperature: " , self.WeatherVars[0] , "rain: " , self.WeatherVars[1], " wind: ", self.WeatherVars[2], " wind direction: ", self.WeatherVars[3])
@@ -741,13 +741,13 @@ class TransportAirPollutionExposureModel(Model):
     def PlotTrafficCount(self):
         self.TraffGrid.plot("count", antialiased=False, legend = True) 
         plt.title(f"Traffic of {nb_humans} assigned at {self.hour-1} to {self.hour} o'clock")
-        plt.savefig(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_{randomID}_assign_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
+        plt.savefig(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_{randomID}_assign_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
         plt.close()
     
     def PlotObservedTraffic(self):
         self.TraffGrid.plot(self.TraffVcolumn, antialiased=False, legend = True) 
         plt.title(f"Traffic observed at {self.hour-1} to {self.hour} o'clock")
-        plt.savefig(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_observed.png')
+        plt.savefig(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_observed.png')
         plt.close()
         
     def TraffCountRegression(self, HourlyTraffic):
@@ -791,7 +791,7 @@ class TransportAirPollutionExposureModel(Model):
     def PlotTraffPred(self):
         self.TraffGrid.plot("TraffV", antialiased=False, legend = True) 
         plt.title(f"Traffic predicted at {self.hour} o'clock")
-        plt.savefig(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_pred_{randomID}_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
+        plt.savefig(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/TrafficMaps/TrafficGrid_pred_{randomID}_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
         plt.close()
 
     def TrafficAssignment(self):
@@ -802,7 +802,7 @@ class TransportAirPollutionExposureModel(Model):
           HourlyTraffic = pool.starmap(RetrieveRoutes, [(Human.thishourmode, Human.thishourtrack) for Human in self.Humans], chunksize = 500)
         HourlyTraffic = list(it.chain.from_iterable(list(filter(lambda x: x is not None, HourlyTraffic))))
         HourlyTraffic = [track for track in HourlyTraffic if track.is_valid]
-        # gpd.GeoDataFrame(data = {'count': [1]*len(self.HourlyTraffic), 'geometry':self.HourlyTraffic}, geometry="geometry", crs=crs).to_file(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/TrafficTracks/TrafficTracks_A{nb_humans}_H{self.hour-1}.shp')
+        # gpd.GeoDataFrame(data = {'count': [1]*len(self.HourlyTraffic), 'geometry':self.HourlyTraffic}, geometry="geometry", crs=crs).to_file(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/TrafficTracks/TrafficTracks_A{nb_humans}_H{self.hour-1}.shp')
         print("Nr of hourly traffic tracks: ", len(HourlyTraffic))
         if self.hour == 0:
           self.TraffVcolumn = f"TrV23_24"
@@ -858,14 +858,14 @@ class TransportAirPollutionExposureModel(Model):
     def PlotAirPoll(self):
         self.TraffGrid.plot("NO2", antialiased=False, legend = True)
         plt.title(f"NO2 Prediction: Month {self.current_datetime.month}, Hour {self.hour -1}")
-        plt.savefig(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/NO2/NO2_{randomID}_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
+        plt.savefig(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/NO2/NO2_{randomID}_A{nb_humans}_M{self.current_datetime.month}_D{self.current_datetime.day}_H{self.hour}_{modelname}.png')
         plt.close()
         time.sleep(1)
     
     def SaveAirPollTraffic(self):
         global AirPollGrid
-        pd.DataFrame(AirPollGrid[["int_id"]+[col for col in AirPollGrid.columns if "prNO2" in col]]).to_csv(path_data+f"ModelRuns/{modelname}/{nb_humans}Agents/NO2/{randomID}/AirPollGrid_NO2_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_{modelname}_{randomID}.csv", index=False)
-        pd.DataFrame(AirPollGrid[["int_id"]+[col for col in AirPollGrid.columns if "prTraff" in col] +  [col for col in AirPollGrid.columns if "TrCount" in col]]).to_csv(path_data+f"ModelRuns/{modelname}/{nb_humans}Agents/Traffic/{randomID}/AirPollGrid_Traff_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_{modelname}_{randomID}.csv", index=False)
+        pd.DataFrame(AirPollGrid[["int_id"]+[col for col in AirPollGrid.columns if "prNO2" in col]]).to_csv(path_data+f"ABMData/ModelRuns/{modelname}/{nb_humans}Agents/NO2/{randomID}/AirPollGrid_NO2_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_{modelname}_{randomID}.csv", index=False)
+        pd.DataFrame(AirPollGrid[["int_id"]+[col for col in AirPollGrid.columns if "prTraff" in col] +  [col for col in AirPollGrid.columns if "TrCount" in col]]).to_csv(path_data+f"ABMData/ModelRuns/{modelname}/{nb_humans}Agents/Traffic/{randomID}/AirPollGrid_Traff_{randomID}_M{self.current_datetime.month}_D{self.current_datetime.day}_{modelname}_{randomID}.csv", index=False)
         AirPollGrid = AirPollGrid.drop([col for col in AirPollGrid.columns if "prNO2" in col]+[col for col in AirPollGrid.columns if "prTraff" in col]+  [col for col in AirPollGrid.columns if "TrCount" in col], axis=1)
 
 
@@ -874,10 +874,10 @@ class TransportAirPollutionExposureModel(Model):
         # manage time variables
         self.current_datetime += self.steps_minute
         if self.current_datetime.hour == 0 and self.current_datetime.day == 8: # completed a week, so switch month
-            if self.current_datetime.month == 10:
-                self.current_datetime = self.current_datetime.replace(day=1, month=self.current_datetime.month + 2)
+            if self.current_datetime.month == (13-MonthsStep):
+                self.current_datetime = self.current_datetime.replace(day=1, month=self.current_datetime.month + (MonthsStep-1))
             else:
-              self.current_datetime = self.current_datetime.replace(day=1, month=self.current_datetime.month + 3)
+              self.current_datetime = self.current_datetime.replace(day=1, month=self.current_datetime.month + MonthsStep)
         print(self.current_datetime)
         self.minute = self.current_datetime.minute
         if self.current_datetime.day == 1 and self.current_datetime.hour == 0 and self.current_datetime.minute == 0: # new month
@@ -927,13 +927,13 @@ class TransportAirPollutionExposureModel(Model):
             Alltracks = pd.DataFrame(list(filter(lambda x: len(x[1])>0, [item for sublist in Alltracks for item in sublist])), 
                         columns=['agent', 'geometry', 'mode', 'duration'])
             Alltracks["geometry"] = Alltracks["geometry"].apply(lambda x: "; ".join([str(el) for el in x]))
-            Alltracks.to_csv(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/Tracks/{randomID}/AllTracks_{randomID}_A{nb_humans}_{self.datesuffix}_{modelname}.csv', 
+            Alltracks.to_csv(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/Tracks/{randomID}/AllTracks_{randomID}_A{nb_humans}_{self.datesuffix}_{modelname}.csv', 
                           index=False, quoting=csv.QUOTE_NONNUMERIC, float_format='%.15g')
 
             self.Humans = list(it.chain.from_iterable(pool.starmap(hourly_worker_process, [(agents, self.current_datetime, np.array(self.TraffGrid["NO2"]), self.WeatherVars)  for agents in np.array_split(self.Humans, n)], chunksize=1)))
             print("collecting and saving exposure")
             AgentExposure = pool.starmap(RetrieveExposure, [(Human, 0) for Human in np.array_split(self.Humans, n)], chunksize = 1)
-            pd.DataFrame([item for items in AgentExposure for item in items], columns=['agent', 'NO2', 'NO2wFilter', 'MET', 'indoortime']).to_csv(path_data + f'ModelRuns/{modelname}/{nb_humans}Agents/AgentExposure/{randomID}/AgentExposure_{randomID}_A{nb_humans}_{self.datesuffix}_{modelname}.csv', index=False)
+            pd.DataFrame([item for items in AgentExposure for item in items], columns=['agent', 'NO2', 'NO2wFilter', 'MET', 'indoortime']).to_csv(path_data + f'ABMData/ModelRuns/{modelname}/{nb_humans}Agents/AgentExposure/{randomID}/AgentExposure_{randomID}_A{nb_humans}_{self.datesuffix}_{modelname}.csv', index=False)
           else:
             self.Humans = list(it.chain.from_iterable(pool.starmap(worker_process, [(Humans, self.current_datetime, self.WeatherVars)  for Humans in np.array_split(self.Humans, n)], chunksize=1)))
         else:
@@ -949,6 +949,9 @@ if __name__ == "__main__":
     #############################################################################################################
     ### Setting simulation parameters
     #############################################################################################################
+    # Set path to repository
+    path_data = "C:/Users/Tabea/Documents/GitHub/TransportAirpollutionScenarioABMs/"
+    
     ## Nr of Processors
     print("Nr of available logical CPUs", os.cpu_count())
     n = os.cpu_count() -4
@@ -966,6 +969,7 @@ if __name__ == "__main__":
     NrHours = 24
     NrDays = 7
     NrMonths = 4
+    MonthsStep = 3
     
     # Starting Date and Time
     starting_date = datetime(2019, 1, 1, 0, 0, 0)
@@ -1004,36 +1008,33 @@ if __name__ == "__main__":
     
     #############################################################################################################
     
-    # Read Main Data
-    path_data = "D:/PhD EXPANSE/Data/Amsterdam/ABMRessources/ABMData/"
-    
         
-    if not os.path.exists(path_data+"ModelRuns/"+modelname):
+    if not os.path.exists(path_data+"ABMData/ModelRuns/"+modelname):
       # Create the directory
-      os.mkdir(path_data+"ModelRuns/"+modelname)
-      if not os.path.exists(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans) + "Agents"):
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/ModalSplit")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks")
-          print("Directory " + path_data+"ModelRuns/"+modelname+"/" + str(nb_humans) + "Agents"" created successfully.")
+      os.mkdir(path_data+"ABMData/ModelRuns/"+modelname)
+      if not os.path.exists(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans) + "Agents"):
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/ModalSplit")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks")
+          print("Directory " + path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans) + "Agents"" created successfully.")
     else:
-      print("Directory " +path_data+"ModelRuns/"+ modelname + " already exists.")
-      if not os.path.exists(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"):
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/ModalSplit")
-          os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks")
-          print("But directory " + path_data+"ModelRuns/"+modelname+"/"+str(nb_humans) + "Agents" " was created successfully.")
+      print("Directory " +path_data+"ABMData/ModelRuns/"+ modelname + " already exists.")
+      if not os.path.exists(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"):
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/ModalSplit")
+          os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks")
+          print("But directory " + path_data+"ABMData/ModelRuns/"+modelname+"/"+str(nb_humans) + "Agents" " was created successfully.")
   
-    os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure/" + str(randomID))
-    os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks/" + str(randomID))
-    os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2/" + str(randomID))
-    os.mkdir(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic/" + str(randomID))
+    os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/AgentExposure/" + str(randomID))
+    os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Tracks/" + str(randomID))
+    os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/NO2/" + str(randomID))
+    os.mkdir(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ "Agents"+"/Traffic/" + str(randomID))
     
     # Synthetic Population
     print("Reading Population Data")
@@ -1042,25 +1043,25 @@ if __name__ == "__main__":
     else:
       popsuffix = ""
     if newpop:
-      pop_df = pd.read_csv(path_data+f"Population/Agent_pop_clean{popsuffix}.csv")
+      pop_df = pd.read_csv(path_data+f"ABMData/Population/Agent_pop_clean{popsuffix}.csv")
       random_subset = pd.DataFrame(pop_df.sample(n=nb_humans))
-      random_subset.to_csv(path_data+f"Population/Amsterdam_population_subset{nb_humans}{popsuffix}.csv", index=False)
+      random_subset.to_csv(path_data+f"ABMData/Population/Amsterdam_population_subset{nb_humans}{popsuffix}.csv", index=False)
     else:
-      random_subset = pd.read_csv(path_data+f"Population/Amsterdam_population_subset{nb_humans}_{subsetnr}{popsuffix}.csv")
+      random_subset = pd.read_csv(path_data+f"ABMData/Population/Amsterdam_population_subset{nb_humans}_{subsetnr}{popsuffix}.csv")
 
     random_subset["student"] = 0
     random_subset.loc[random_subset["current_education"] == "high", "student"] = 1
-    random_subset.to_csv(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ f"Agents/Amsterdam_population_subset{nb_humans}_{randomID}_{subsetnr}{popsuffix}.csv", index=False)
+    random_subset.to_csv(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ f"Agents/Amsterdam_population_subset{nb_humans}_{randomID}_{subsetnr}{popsuffix}.csv", index=False)
     
     # Activity Schedules
     print("Reading Activity Schedules")
-    scheduledf_monday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Monday.csv")
-    scheduledf_tuesday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Tuesday.csv")
-    scheduledf_wednesday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Wednesday.csv")
-    scheduledf_thursday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Thursday.csv")
-    scheduledf_friday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Friday.csv")
-    scheduledf_saturday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Saturday.csv")
-    scheduledf_sunday = pd.read_csv(path_data+"ActivitySchedules/Synthpop_schedulesclean_Sunday.csv")
+    scheduledf_monday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Monday.csv")
+    scheduledf_tuesday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Tuesday.csv")
+    scheduledf_wednesday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Wednesday.csv")
+    scheduledf_thursday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Thursday.csv")
+    scheduledf_friday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Friday.csv")
+    scheduledf_saturday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Saturday.csv")
+    scheduledf_sunday = pd.read_csv(path_data+"ABMData/ActivitySchedules/Synthpop_schedulesclean_Sunday.csv")
     schedulelist = [scheduledf_monday, scheduledf_tuesday, scheduledf_wednesday, scheduledf_thursday, scheduledf_friday, scheduledf_saturday, scheduledf_sunday]
     del scheduledf_monday, scheduledf_tuesday, scheduledf_wednesday, scheduledf_thursday, scheduledf_friday, scheduledf_saturday, scheduledf_sunday
 
@@ -1071,65 +1072,65 @@ if __name__ == "__main__":
     projecy_to_crs = Transformer.from_crs("epsg:4326", crs, always_xy=True).transform
 
     # Load the spatial built environment
-    spatial_extent = gpd.read_feather(path_data+"SpatialData/SpatialExtent.feather")
-    buildings = gpd.read_feather(path_data+"SpatialData/Buildings.feather")
-    streets = gpd.read_feather(path_data+"SpatialData/Streets.feather")
-    Residences = gpd.read_feather(path_data+"SpatialData/Residences.feather")
-    carroads = gpd.read_feather(path_data+"SpatialData/carroads.feather")
-    Universities = gpd.read_feather(path_data+"SpatialData/Universities.feather")
+    spatial_extent = gpd.read_feather(path_data+"ABMData/SpatialData/SpatialExtent.feather")
+    buildings = gpd.read_feather(path_data+"ABMData/SpatialData/Buildings.feather")
+    streets = gpd.read_feather(path_data+"ABMData/SpatialData/Streets.feather")
+    Residences = gpd.read_feather(path_data+"ABMData/SpatialData/Residences.feather")
+    carroads = gpd.read_feather(path_data+"ABMData/SpatialData/carroads.feather")
+    Universities = gpd.read_feather(path_data+"ABMData/SpatialData/Universities.feather")
     
     if modelname in ["15mCity", "15mCityWithDestination"]:
-      greenspace = gpd.read_feather(path_data+f"SpatialData/GreenspaceCentroids15mCity.feather")
-      Schools = gpd.read_feather(path_data+f"SpatialData/Schools15mCity.feather")
-      Supermarkets = gpd.read_feather(path_data+f"SpatialData/Supermarkets15mCity.feather")
-      Kindergardens = gpd.read_feather(path_data+f"SpatialData/Kindergardens15mCity.feather")
-      Restaurants = gpd.read_feather(path_data+f"SpatialData/Restaurants15mCity.feather")
-      Entertainment = gpd.read_feather(path_data+f"SpatialData/Entertainment15mCity.feather")
-      ShopsnServ = gpd.read_feather(path_data+f"SpatialData/ShopsnServ15mCity.feather")
-      Nightlife = gpd.read_feather(path_data+f"SpatialData/Nightlife15mCity.feather")
-      Profess = gpd.read_feather(path_data+f"SpatialData/Profess15mCity.feather")
+      greenspace = gpd.read_feather(path_data+f"ABMData/SpatialData/GreenspaceCentroids15mCity.feather")
+      Schools = gpd.read_feather(path_data+f"ABMData/SpatialData/Schools15mCity.feather")
+      Supermarkets = gpd.read_feather(path_data+f"ABMData/SpatialData/Supermarkets15mCity.feather")
+      Kindergardens = gpd.read_feather(path_data+f"ABMData/SpatialData/Kindergardens15mCity.feather")
+      Restaurants = gpd.read_feather(path_data+f"ABMData/SpatialData/Restaurants15mCity.feather")
+      Entertainment = gpd.read_feather(path_data+f"ABMData/SpatialData/Entertainment15mCity.feather")
+      ShopsnServ = gpd.read_feather(path_data+f"ABMData/SpatialData/ShopsnServ15mCity.feather")
+      Nightlife = gpd.read_feather(path_data+f"ABMData/SpatialData/Nightlife15mCity.feather")
+      Profess = gpd.read_feather(path_data+f"ABMData/SpatialData/Profess15mCity.feather")
     else:
-      greenspace = gpd.read_feather(path_data+"SpatialData/GreenspaceCentroids.feather")
-      Schools = gpd.read_feather(path_data+"SpatialData/Schools.feather")
-      Supermarkets = gpd.read_feather(path_data+"SpatialData/Supermarkets.feather")
-      Kindergardens = gpd.read_feather(path_data+"SpatialData/Kindergardens.feather")
-      Restaurants = gpd.read_feather(path_data+"SpatialData/Restaurants.feather")
-      Entertainment = gpd.read_feather(path_data+"SpatialData/Entertainment.feather")
-      ShopsnServ = gpd.read_feather(path_data+"SpatialData/ShopsnServ.feather")
-      Nightlife = gpd.read_feather(path_data+"SpatialData/Nightlife.feather")
-      Profess = gpd.read_feather(path_data+"SpatialData/Profess.feather")
+      greenspace = gpd.read_feather(path_data+"ABMData/SpatialData/GreenspaceCentroids.feather")
+      Schools = gpd.read_feather(path_data+"ABMData/SpatialData/Schools.feather")
+      Supermarkets = gpd.read_feather(path_data+"ABMData/SpatialData/Supermarkets.feather")
+      Kindergardens = gpd.read_feather(path_data+"ABMData/SpatialData/Kindergardens.feather")
+      Restaurants = gpd.read_feather(path_data+"ABMData/SpatialData/Restaurants.feather")
+      Entertainment = gpd.read_feather(path_data+"ABMData/SpatialData/Entertainment.feather")
+      ShopsnServ = gpd.read_feather(path_data+"ABMData/SpatialData/ShopsnServ.feather")
+      Nightlife = gpd.read_feather(path_data+"ABMData/SpatialData/Nightlife.feather")
+      Profess = gpd.read_feather(path_data+"ABMData/SpatialData/Profess.feather")
     
 
     # Load Intervention Environment
     # Status Quo
     if modelname in ["StatusQuo","PrkPriceInterv", "NoEmissionZone2025", "NoEmissionZone2030"]:
-      EnvBehavDeterms = gpd.read_feather(path_data+"SpatialData/EnvBehavDeterminants.feather")
+      EnvBehavDeterms = gpd.read_feather(path_data+"ABMData/SpatialData/EnvBehavDeterminants.feather")
       if modelname == "PrkPriceInterv":
         EnvBehavDeterms["PrkPricPre"] = EnvBehavDeterms["PrkPricPos"]
     elif modelname in ["15mCity", "15mCityWithDestination"]:
-      EnvBehavDeterms = gpd.read_feather(path_data+f"SpatialData/EnvBehavDeterminants15mCity.feather")
+      EnvBehavDeterms = gpd.read_feather(path_data+f"ABMData/SpatialData/EnvBehavDeterminants15mCity.feather")
       EnvBehavDeterms['retaiDns'] = EnvBehavDeterms['retaiDns15']
       # EnvBehavDeterms['greenCovr'] = EnvBehavDeterms['grenCovr15']
       EnvBehavDeterms['retailDiv'] = EnvBehavDeterms['retDiv15']
     # other Interventions
     else:
-      EnvBehavDeterms = gpd.read_feather(path_data+f"SpatialData/EnvBehavDeterminants{modelname}.feather")
+      EnvBehavDeterms = gpd.read_feather(path_data+f"ABMData/SpatialData/EnvBehavDeterminants{modelname}.feather")
 
     # Read the Environmental Stressor Data and Model
     cellsize = "50m"
     suffix = "TrV_TrI_noTrA"
     iter, meteolog = False, False
     matrixsize = 3
-    with open(f"{path_data}AirPollutionModelData/optimalparams_{cellsize}_scalingMS{matrixsize}iter{iter}MeteoLog{meteolog}.json", "r") as read_file:
+    with open(f"{path_data}ABMData/AirPollutionModelData/optimalparams_{cellsize}_scalingMS{matrixsize}iter{iter}MeteoLog{meteolog}.json", "r") as read_file:
             optimalparams = json.load(read_file)
     del optimalparams["nr_repeats"]
-    AirPollGrid = gpd.read_feather(path_data+f"SpatialData/AirPollgrid{cellsize}.feather")
-    AirPollPred = pd.read_csv(path_data+f"AirPollutionModelData/Pred_{cellsize}{suffix}.csv")
+    AirPollGrid = gpd.read_feather(path_data+f"ABMData/SpatialData/AirPollgrid{cellsize}.feather")
+    AirPollPred = pd.read_csv(path_data+f"ABMData/AirPollutionModelData/Pred_{cellsize}{suffix}.csv")
     AirPollPred.fillna(0, inplace=True)
     AirPollGrid[["baseline_NO2", "ON_ROAD"]] = AirPollPred[["baseline_NO2", "ON_ROAD"]]
-    airpoll_grid_raster = xr.open_dataarray(path_data+ f"AirPollutionModelData/AirPollDeterm_grid_{cellsize}.tif", engine="rasterio")[0] # Read raster data using rasterio
-    moderator_df = pd.read_csv(path_data+ f"AirPollutionModelData/moderator_{cellsize}.csv")     # Read moderator DataFrame
-    streetLength = pd.read_csv(path_data+ f"AirPollutionModelData/StreetLength_{cellsize}.csv")
+    airpoll_grid_raster = xr.open_dataarray(path_data+ f"ABMData/AirPollutionModelData/AirPollDeterm_grid_{cellsize}.tif", engine="rasterio")[0] # Read raster data using rasterio
+    moderator_df = pd.read_csv(path_data+ f"ABMData/AirPollutionModelData/moderator_{cellsize}.csv")     # Read moderator DataFrame
+    streetLength = pd.read_csv(path_data+ f"ABMData/AirPollutionModelData/StreetLength_{cellsize}.csv")
     streetLength =  np.array(streetLength["StreetLength"])
     
     data_presets = {
@@ -1151,9 +1152,9 @@ if __name__ == "__main__":
 
     if TraffStage in ["PredictionNoR2", "PredictionR2"]:
       if modelname in ["NoEmissionZone2025", "PrkPriceInterv"]:
-        TraffVrest = pd.read_csv(path_data+f"TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}_{modelname}.csv")
+        TraffVrest = pd.read_csv(path_data+f"ABMData/TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}_{modelname}.csv")
       else:
-        TraffVrest = pd.read_csv(path_data+f"TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}.csv")
+        TraffVrest = pd.read_csv(path_data+f"ABMData/TrafficRemainder/AirPollGrid_HourlyTraffRemainder_{nb_humans}.csv")
       AirPollGrid = AirPollGrid.merge(TraffVrest, how = "left", on = "int_id")
 
 
@@ -1165,7 +1166,7 @@ if __name__ == "__main__":
 
       # Start OSRM Servers
     print("Starting OSRM Servers")
-    subprocess.call([r"C:\Users\Tabea\Documents\GitHub\Spatial-Agent-based-Modeling-of-Urban-Health-Interventions\start_OSRM_Servers.bat"])
+    subprocess.call([rf"{path_data}ABMScripts/start_OSRM_Servers.bat"])
 
 
     # Read the Mode of Transport Choice Model
@@ -1187,10 +1188,10 @@ if __name__ == "__main__":
 
     colvars = routevariables_suff + originvariables_suff + destinvariables_suff + personalvariables + tripvariables + weathervariables
   
-    ModalChoiceModel = PMMLForestClassifier(pmml=path_data+f"ModalChoiceModel/RandomForest.pmml")
+    ModalChoiceModel = PMMLForestClassifier(pmml=path_data+f"ABMData/ModalChoiceModel/RandomForest.pmml")
     ModalChoiceModel.splitter = "random"
     OrderPredVars = []
-    with open(path_data+f"ModalChoiceModel/RFfeatures.txt", 'r') as file:
+    with open(path_data+f"ABMData/ModalChoiceModel/RFfeatures.txt", 'r') as file:
       for line in file.readlines():
           OrderPredVars.append(line.strip())
     print(OrderPredVars)
@@ -1198,15 +1199,15 @@ if __name__ == "__main__":
     # Preparing Log Documents
     print("Preparing Log Documents")
     if TraffStage != "PredictionNoR2":
-      TraffAssDat = open(f'{path_data}ModelRuns/{modelname}/{nb_humans}Agents/Traffic/TraffAssignModelPerf{nb_humans}_{modelname}_pop{subsetnr}_{randomID}.txt', 'a',buffering=1)
+      TraffAssDat = open(f'{path_data}ABMData/ModelRuns/{modelname}/{nb_humans}Agents/Traffic/TraffAssignModelPerf{nb_humans}_{modelname}_pop{subsetnr}_{randomID}.txt', 'a',buffering=1)
       TraffAssDat.write(f"Number of Agents: {nb_humans} \n")
 
-    ModalSplitLog = open(f'{path_data}ModelRuns/{modelname}/{nb_humans}Agents/ModalSplit/ModalSplitLog{nb_humans}_{modelname}_{randomID}.txt', 'a',buffering=1)
+    ModalSplitLog = open(f'{path_data}ABMData/ModelRuns/{modelname}/{nb_humans}Agents/ModalSplit/ModalSplitLog{nb_humans}_{modelname}_{randomID}.txt', 'a',buffering=1)
     ModalSplitLog.write(f"Number of Agents: {nb_humans} \n")
 
 
     # Initializing Simulation
-    m = TransportAirPollutionExposureModel(nb_humans=nb_humans, path_data=path_data, starting_date=starting_date)
+    m = TransportAirPollutionExposureModel(nb_humans=nb_humans, path_data=path_data, starting_date=starting_date, MonthsStep=MonthsStep)
    
     print("Starting Multiprocessing Pool")
     pool =  Pool(processes=n, initializer= init_worker_simul, initargs=(Residences, Entertainment, Restaurants,  ShopsnServ, EnvBehavDeterms, 
@@ -1240,7 +1241,7 @@ if __name__ == "__main__":
             
     if TraffStage == "Remainder":
       traffrestcols = [ col for col in AirPollGrid.columns if "TraffVrest" in col]
-      pd.DataFrame(AirPollGrid[["int_id"]+ traffrestcols]).to_csv(path_data+"ModelRuns/"+modelname+"/" + str(nb_humans)+ f"Agents/Traffic/AirPollGrid_HourlyTraffRemainder_{nb_humans}_pop{subsetnr}_{randomID}.csv", index=False)
+      pd.DataFrame(AirPollGrid[["int_id"]+ traffrestcols]).to_csv(path_data+"ABMData/ModelRuns/"+modelname+"/" + str(nb_humans)+ f"Agents/Traffic/AirPollGrid_HourlyTraffRemainder_{nb_humans}_pop{subsetnr}_{randomID}.csv", index=False)
     
     if TraffStage != "PredictionNoR2":
       TraffAssDat.close()
