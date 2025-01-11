@@ -89,7 +89,7 @@ pip install sklearn_pmml_model polyline
 # ... etc.
 
 # Then clone or download this repository:
-git clone [https://github.com/TabeaSonnenschein/TransportAirpollutionScenarioABMs.git](https://github.com/TabeaSonnenschein/TransportAirpollutionScenarioABMs.git)
+git clone https://github.com/TabeaSonnenschein/TransportAirpollutionScenarioABMs.git
 cd TransportAirpollutionScenarioABMs
 ```
 
