@@ -985,6 +985,9 @@ if __name__ == "__main__":
     # cellsize of the Airpollution and Traffic grid
     cellsize = 50    # 50m x 50m
     
+    #set the Coordinate Reference System
+    crs = "epsg:28992"
+    
     # Profiling code or not
     profile = False
     
@@ -1067,7 +1070,6 @@ if __name__ == "__main__":
 
 
     # Coordinate Reference System and CRS transformers
-    crs = "epsg:28992"
     project_to_WSG84 = Transformer.from_crs(crs, "epsg:4326", always_xy=True).transform
     projecy_to_crs = Transformer.from_crs("epsg:4326", crs, always_xy=True).transform
 
