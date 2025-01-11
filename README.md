@@ -56,41 +56,20 @@ It leverages real-world data (e.g., geospatial building footprints, road network
 
 We recommend **Python 3.8** or higher.  
 
-### B) Required Libraries
-
-Below is a list of main libraries used. You can install them via `pip install <library_name>` or create a conda environment if preferred. The model uses the **[Mesa](https://github.com/projectmesa/mesa)** library for its ABM framework, **[GeoPandas](https://github.com/geopandas/geopandas)** and **[Shapely](https://github.com/shapely/shapely)** for geographic data handling, and additional libraries for parallelization, route calculation (via **[OSRM](https://project-osrm.org/)**), and data analysis.
-
-1. **[Mesa](https://github.com/projectmesa/mesa)** – for agent-based modeling.
-2. **GeoPandas** – for handling geospatial data.
-3. **Shapely** – advanced geometry operations.
-4. **scikit-learn** – for mode choice and regression tasks.
-5. **pandas**, **numpy** – data manipulation and numerical computation.
-6. **matplotlib**, **seaborn** (optional) – plotting.
-7. **xarray** – reading or writing multi-dimensional arrays (used in pollution grid).
-8. **requests**, **polyline** – for HTTP requests to OSRM and decoding polylines.
-9. **pyproj** / **Transformer** – coordinate system transformations.
-10. **joblib** – possible model serialization.
-11. **PMMLForestClassifier** (from `sklearn_pmml_model`) – loading PMML models.
-
-Additionally:
-- **multiprocessing**, **concurrent.futures** – parallel processing.
-- **cProfile**, **pstats** – optional for profiling code.
-
-### C) Installing & Setting Up an Environment
+### B) Setting Up an Environment & Installing required Packages
 
 ```bash
 # Example using conda:
 conda create -n abm_env python=3.9
 conda activate abm_env
 
-# Install key packages (example, adapt as needed):
-conda install -c conda-forge mesa geopandas shapely xarray scikit-learn pyproj requests
-pip install sklearn_pmml_model polyline
-# ... etc.
-
-# Then clone or download this repository:
+# Clone or download this repository:
 git clone https://github.com/TabeaSonnenschein/TransportAirpollutionScenarioABMs.git
 cd TransportAirpollutionScenarioABMs
+
+# Install required packages:
+pip install -r requirements.txt
+
 ```
 
 ---
