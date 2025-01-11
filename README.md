@@ -10,16 +10,17 @@ This repository (or script) contains an **Agent-Based Model (ABM)** that simulat
 1. [Overview](#overview)
 2. [Key Features](#key-features)
 3. [Installation & Dependencies](#installation--dependencies)
-4. [Required Data & Folder Structure](#required-data--folder-structure)
-5. [Usage](#usage)
-6. [Script Structure & Main Components](#script-structure--main-components)
-7. [Running the Simulation](#running-the-simulation)
-8. [Outputs](#outputs)
-9. [Customization & Scenarios](#customization--scenarios)
-10. [Performance & Parallelization](#performance--parallelization)
-11. [Troubleshooting](#troubleshooting)
-12. [License](#license)
-13. [Contact](#contact)
+4. [Input Data & Models](#input-data--models)
+5. [ABM Output File Contents](#abm-output-file-contents)
+6. [Folder Structure](#folder-structure)
+7. [Usage](#usage)
+8. [Script Structure & Main Components](#script-structure--main-components)
+9. [Running the Simulation](#running-the-simulation)
+10. [Customization & Scenarios](#customization--scenarios)
+11. [Performance & Parallelization](#performance--parallelization)
+12. [Troubleshooting](#troubleshooting)
+13. [License](#license)
+14. [Contact](#contact)
 
 ---
 
@@ -93,8 +94,9 @@ cd <this-repo>
 ```
 
 ---
-## Input Data
+## 4. Input Data & Models
 
+## Input Data
 | **Input Data**          | **Location**                                 | **Content**                                                     | **Key Variables / Notes**                                                                 |
 |-------------------------|----------------------------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | **Synthetic Population**| `Population/Agent_pop_clean*.csv`           | Complete or subsetted list of synthetic agents.                 | Demographic attributes, car ownership, education, etc.                                     |
@@ -124,7 +126,27 @@ cd <this-repo>
 | **OSRM Routing Profiles**       | N/A (external OSRM server or `.bat` file to start OSRM) | Provides route calculations for “car”, “bike”, “foot” (and transit).    | The script queries local OSRM servers via HTTP. Must be running on ports 5000, 5001, 5002.                                                     |
 
 
-## 4. Required Data & Folder Structure
+---
+
+## 5. ABM Output File Contents
+
+Each model run creates folders within each location named after the **modelrun** and the **number of agents** used. The table below summarizes the key output types, folder locations, and their main variables:
+
+| **Output Type**                     | **Location**                                                | **Content**                                                                              | **Variables**                                                                        |
+|-------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| **Synthetic Population Sample**     | `ModelRuns/(nr agents) Agents`                             | The sample of the population used in the simulation                                      | All synthetic population variables                                                   |
+| **Residences**                      | `ModelRuns/(nr agents) Agents`                             | The residential coordinates of the specific population                                    | `AgentID`, residence coordinates                                                     |
+| **Exposure**                        | `ModelRuns/(nr agents) Agents/AgentExposure/(modelrun)`     | Personal exposure estimates for each agent per hour                                      | `AgentID`, `NO2`, `NO2wFilter`, `MET`, `indoortime`                                  |
+| **NO2**                             | `ModelRuns/(nr agents) Agents/NO2/(modelrun)`               | Hourly NO2 concentrations per grid cell, saved per day                                   | `GridID`, NO2 concentrations per hour                                               |
+| **Traffic**                         | `ModelRuns/(nr agents) Agents/Traffic/(modelrun)`           | Traffic Volume and Count per grid cell per hour, possibly intermediate regression stats if *Regression* or *Remainder* mode is used.                                          | `GridID`, Traffic Volume per hour, Traffic Count per hour                           |
+| **ModalSplit**                      | `ModelRuns/(nr agents) Agents/ModalSplit/(modelrun)`        | Modal Split per hour (number of people traveling by specific modes)                      | Drive trip counts, Bike trip counts, Walk trip counts, Public Transport trip counts |
+| **Tracks**                          | `ModelRuns/(nr agents) Agents/Tracks/(modelrun)`            | Each agent’s tracks per hour                                                             | `AgentID`, list of trip geometries, list of corresponding modes, trip durations     |
+| **Console Output**                         | `ModelRuns/(nr agents) Agents/Tracks/(modelrun)`            | Periodic status about time steps, traffic assignment times, or memory usage.                                                             | |
+
+
+---
+
+## 6. Folder Structure
 
 The script expects a certain file/folder layout under the variable `path_data`:
 
@@ -182,24 +204,7 @@ D:/PhD EXPANSE/Data/Amsterdam/ABMRessources/ABMData/
 
 ---
 
-## ABM Output Folders and File Contents
-
-Each model run creates folders within each location named after the **modelrun** and the **number of agents** used. The table below summarizes the key output types, folder locations, and their main variables:
-
-| **Output Type**                     | **Location**                                                | **Content**                                                                              | **Variables**                                                                        |
-|-------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| **Synthetic Population Sample**     | `ModelRuns/(nr agents) Agents`                             | The sample of the population used in the simulation                                      | All synthetic population variables                                                   |
-| **Residences**                      | `ModelRuns/(nr agents) Agents`                             | The residential coordinates of the specific population                                    | `AgentID`, residence coordinates                                                     |
-| **Exposure**                        | `ModelRuns/(nr agents) Agents/AgentExposure/(modelrun)`     | Personal exposure estimates for each agent per hour                                      | `AgentID`, `NO2`, `NO2wFilter`, `MET`, `indoortime`                                  |
-| **NO2**                             | `ModelRuns/(nr agents) Agents/NO2/(modelrun)`               | Hourly NO2 concentrations per grid cell, saved per day                                   | `GridID`, NO2 concentrations per hour                                               |
-| **Traffic**                         | `ModelRuns/(nr agents) Agents/Traffic/(modelrun)`           | Traffic Volume and Count per grid cell per hour                                          | `GridID`, Traffic Volume per hour, Traffic Count per hour                           |
-| **ModalSplit**                      | `ModelRuns/(nr agents) Agents/ModalSplit/(modelrun)`        | Modal Split per hour (number of people traveling by specific modes)                      | Drive trip counts, Bike trip counts, Walk trip counts, Public Transport trip counts |
-| **Tracks**                          | `ModelRuns/(nr agents) Agents/Tracks/(modelrun)`            | Each agent’s tracks per hour                                                             | `AgentID`, list of trip geometries, list of corresponding modes, trip durations     |
-
-
-
-
-## 5. Usage
+## 7. Usage
 
 1. **Edit** the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run.
 2. **Ensure** OSRM servers are running. The script calls a batch file `start_OSRM_Servers.bat` to start local OSRM instances for `bike`, `car`, and `foot` profiles on ports `5001`, `5000`, and `5002`.  
@@ -212,7 +217,7 @@ Each model run creates folders within each location named after the **modelrun**
 
 ---
 
-## 6. Script Structure & Main Components
+## 8. Script Structure & Main Components
 
 ### A) **Agent Class: `Humans`**
 - Inherits from `mesa.Agent`.
@@ -247,7 +252,7 @@ Each model run creates folders within each location named after the **modelrun**
 
 ---
 
-## 7. Running the Simulation
+## 9. Running the Simulation
 
 1. **Check** that all data needed is in the correct folder structure (see [Required Data & Folder Structure](#required-data--folder-structure)).
 2. **Adjust** the parameters at the bottom of the script to your preferred simulation configuration.
@@ -259,22 +264,10 @@ Each model run creates folders within each location named after the **modelrun**
     - Step through simulation time (`month -> day -> hour -> every 10 minutes`).
     - Save output files and logs to disk.
 
----
-
-## 8. Outputs
-
-During (and after) the run, the script writes:
-
-- **Exposure** logs (`AgentExposure/...`): Hourly or sub-hourly NO2 exposures, time spent indoors, etc.
-- **Traffic** logs (`Traffic/...`): Grid-level traffic volumes, possibly intermediate regression stats if *Regression* or *Remainder* mode is used.
-- **NO2** files (`NO2/...`): Predicted NO2 columns appended to each grid cell in CSV form; can be used for further GIS or analysis.
-- **Tracks** logs (`Tracks/...`): Each agent’s travel geometry per hour (for debugging or visualization).
-- **ModalSplit** logs (`ModalSplit/...`): Aggregated usage counts of each mode (bike, drive, transit, walk) for each hour.
-- **Console Output**: Periodic status about time steps, traffic assignment times, or memory usage.
 
 ---
 
-## 9. Customization & Scenarios
+## 10. Customization & Scenarios
 
 - **Scenarios**: The script shows example scenarios:  
   - **`"StatusQuo"`**: Baseline city conditions.  
@@ -293,7 +286,7 @@ During (and after) the run, the script writes:
 
 ---
 
-## 10. Performance & Parallelization
+## 11. Performance & Parallelization
 
 - Uses **`multiprocessing.Pool`** to distribute agent steps and traffic assignment across multiple cores.  
 - The variable `n = os.cpu_count() - 4` (by default) reserves some cores for system tasks. Adapt as necessary.  
@@ -302,7 +295,7 @@ During (and after) the run, the script writes:
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 1. **OSRM Connection Errors**  
    - Ensure OSRM servers are running at the expected ports (5000, 5001, 5002).  
@@ -321,10 +314,10 @@ During (and after) the run, the script writes:
 
 ---
 
-## 12. License
+## 13. License
 This project is licensed under the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-## 13. Contact
+## 14. Contact
 
 For questions, suggestions, or further collaboration, please reach out to:
 - **Name**: Tabea Sonnenschein
@@ -333,4 +326,4 @@ For questions, suggestions, or further collaboration, please reach out to:
 
 ---
 
-*Thank you for using this ABM script! We hope it proves insightful for urban mobility and air-quality research.*
+*Thank you for using this ABM script! We hope it proves insightful for urban transport scenario analysis and air-quality research.*
