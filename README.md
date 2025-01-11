@@ -13,10 +13,10 @@ This repository (or script) contains an **Agent-Based Model (ABM)** that simulat
 4. [Input Data & Models](#input-data--models)
 5. [ABM Output File Contents](#abm-output-file-contents)
 6. [Folder Structure](#folder-structure)
-7. [Usage](#usage)
-8. [Script Structure & Main Components](#script-structure--main-components)
-9. [Running the Simulation](#running-the-simulation)
-10. [Customization & Scenarios](#customization--scenarios)
+7. [Setting up local OSRM instance](#setting-up-local-osrm-instance)
+8. [Usage](#usage)
+9. [Customization & Scenarios](#customization--scenarios)
+10. [Script Structure & Main Components](#script-structure--main-components)
 11. [Performance & Parallelization](#performance--parallelization)
 12. [Troubleshooting](#troubleshooting)
 13. [License](#license)
@@ -180,10 +180,15 @@ TransportAirpollutionScenarioABMs/ABMData/
 ```
 
 > **Note**: This structure is illustrated in the script. You need to adapt `path_data` for the paths to the Repository.
+---
+
+## 7. Setting up local OSRM instance
+
+Find the instructions in `SETUP_OSRM_README.md`.
 
 ---
 
-## 7. Usage
+## 8. Usage
 
 1. **Set path to repository** : Set `path_data` to the path to the repository
 1. **Configure the Simulation Settings**: Edit the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run. See next section for instructions.
@@ -196,7 +201,7 @@ TransportAirpollutionScenarioABMs/ABMData/
 4. **Monitor** logs and outputs. Various CSV files, shapefiles, or figures are saved into the `ModelRuns/...` subdirectories.
 
 
-## 8. Customization & Scenarios
+## 9. Customization & Scenarios
 
 Scenario parameters:
 - `modelname`  indicates the type of scenario you are testing:  
@@ -224,7 +229,7 @@ Scenario parameters:
 
 ---
 
-## 9. Script Structure & Main Components
+## 10. Script Structure & Main Components
 
 ### A) **Agent Class: `Humans`**
 - Inherits from `mesa.Agent`.
@@ -259,7 +264,7 @@ Scenario parameters:
 
 ---
 
-## 10. Performance & Parallelization
+## 11. Performance & Parallelization
 
 - Uses **`multiprocessing.Pool`** to distribute agent steps and traffic assignment across multiple cores.  
 - The variable `n = os.cpu_count() - 4` (by default) reserves some cores for system tasks. Adapt as necessary.  
@@ -268,7 +273,7 @@ Scenario parameters:
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 1. **OSRM Connection Errors**  
    - Ensure OSRM servers are running at the expected ports (5000, 5001, 5002).  
@@ -287,10 +292,10 @@ Scenario parameters:
 
 ---
 
-## 12. License
+## 13. License
 This project is licensed under the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-## 13. Contact
+## 14. Contact
 
 For questions, suggestions, or further collaboration, please reach out to:
 - **Name**: Tabea Sonnenschein
