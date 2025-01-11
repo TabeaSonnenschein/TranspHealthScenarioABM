@@ -186,7 +186,7 @@ TransportAirpollutionScenarioABMs/ABMData/
 ## 7. Usage
 
 1. **Set path to repository** : Set `path_data` to the path to the repository
-1. **Configure the Simulation Settings**: Edit the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run.
+1. **Configure the Simulation Settings**: Edit the parameters at the bottom of the script (e.g., `nb_humans`, `modelname`, `TraffStage`, `starting_date`, etc.) to configure your simulation run. See next section for instructions.
 2. **Ensure** OSRM servers are running. The script calls a batch file `start_OSRM_Servers.bat` to start local OSRM instances for `bike`, `car`, and `foot` profiles on ports `5001`, `5000`, and `5002`.  
    - You may need to adapt or create your own `.bat` scripts for your OSRM setup.
 3. **Run** the script:
@@ -195,9 +195,32 @@ TransportAirpollutionScenarioABMs/ABMData/
    ```
 4. **Monitor** logs and outputs. Various CSV files, shapefiles, or figures are saved into the `ModelRuns/...` subdirectories.
 
+
+## 8. Customization & Scenarios
+
+Scenario parameters:
+- `modelname`  indicates the type of scenario you are testing:  
+  - **`"StatusQuo"`**: Baseline city conditions.  
+  - **`"PrkPriceInterv"`**: Example scenario with changed parking price variables.  
+  - **`"15mCity"`** or **`"15mCityWithDestination"`**: Where destinations (work, shops) might be forced within 15 minutes from home.  
+  - **`"NoEmissionZone2025/2030"`**: Vehicle-based restrictions if the user does not have electric car access.
+
+- `nb_humans` to control how many agents are simulated (from ~1% to 10% of the real population).
+- `newpop` (boolean) indicates whether you want to create a new sample of the total population based on the `nb_humans`
+- `subsetnr` only is used if `newpop = False` and indicates the existing subsample of the population to be used (we have 10 existing samples that are used for each scenario for Monte Carlo simulation)
+
+
+- `starting_date` used the datetime structure to set the real world time starting point (e.g. `datetime(2019, 1, 1, 0, 0, 0)`)
+- The simulation extent can be changed via `NrDays`, `NrMonths`, `NrHours` and `MonthsStep`. The simulation timestep is 10 minutes. But how many hours per day, how many days per months and how many months and with which months step are modeled is determined using these parameters. The default is 24h (full day), 7 days (a week), 4 months but with a MonthsStep of 3 (so every 3rd months is modeled).
+
+- `TraffStage`: Can be used to calculate the Traffic Assignment  model based on the Status Quo synthetic population traffic behavior. 
+  - `"Regression"` – Uses a linear regression approach to match assigned vs. observed traffic.  
+  - `"Remainder"` – Stores partial differences in traffic for subsequent hours.  
+  - `"PredictionNoR2"` or `"PredictionR2"` – A final forecast step with or without R² logging.
+
 ---
 
-## 8. Script Structure & Main Components
+## 9. Script Structure & Main Components
 
 ### A) **Agent Class: `Humans`**
 - Inherits from `mesa.Agent`.
@@ -227,46 +250,12 @@ TransportAirpollutionScenarioABMs/ABMData/
 - `TraffStage`: decides how traffic volumes are calculated (e.g., *"Regression"*, *"Remainder"*, *"PredictionNoR2"*, etc.).
 - `nb_humans`: total agents simulated.
 - `starting_date`: simulation start date.
-- `NrDays`, `NrHours`, `NrMonths`: length of simulation.
+- `NrDays`, `NrHours`, `NrMonths`: length of simulation. 
 - More advanced parameters in the bottom block.
 
 ---
 
-## 9. Running the Simulation
-
-1. **Check** that all data needed is in the correct folder structure (see [Required Data & Folder Structure](#required-data--folder-structure)).
-2. **Adjust** the parameters at the bottom of the script to your preferred simulation configuration.
-3. **Start** your OSRM servers (or adapt the script to your environment).
-4. **Execute** the Python script. By default, it will:
-    - Create subfolders in `ModelRuns/<modelname>/<nb_humans>Agents`.
-    - Sample or load a population (depending on `newpop`).
-    - Initialize all agents.
-    - Step through simulation time (`month -> day -> hour -> every 10 minutes`).
-    - Save output files and logs to disk.
-
-
----
-
-## 10. Customization & Scenarios
-
-- **Scenarios**: The script shows example scenarios:  
-  - **`"StatusQuo"`**: Baseline city conditions.  
-  - **`"PrkPriceInterv"`**: Example scenario with changed parking price variables.  
-  - **`"15mCity"`** or **`"15mCityWithDestination"`**: Where destinations (work, shops) might be forced within 15 minutes from home.  
-  - **`"NoEmissionZone2025/2030"`**: Vehicle-based restrictions if the user does not have electric car access.  
-
-- **Traffic Stage** (`TraffStage`):  
-  - `"Regression"` – Uses a linear regression approach to match assigned vs. observed traffic.  
-  - `"Remainder"` – Stores partial differences in traffic for subsequent hours.  
-  - `"PredictionNoR2"` or `"PredictionR2"` – A final forecast step with or without R² logging.
-
-- **Population Size**: Adjust `nb_humans` to control how many agents are simulated (from ~1% to 10% of the real population).
-
-- **Time Horizon**: The simulation time can be changed via `NrDays`, `NrMonths`, and `NrHours`.
-
----
-
-## 11. Performance & Parallelization
+## 10. Performance & Parallelization
 
 - Uses **`multiprocessing.Pool`** to distribute agent steps and traffic assignment across multiple cores.  
 - The variable `n = os.cpu_count() - 4` (by default) reserves some cores for system tasks. Adapt as necessary.  
@@ -275,7 +264,7 @@ TransportAirpollutionScenarioABMs/ABMData/
 
 ---
 
-## 12. Troubleshooting
+## 11. Troubleshooting
 
 1. **OSRM Connection Errors**  
    - Ensure OSRM servers are running at the expected ports (5000, 5001, 5002).  
@@ -294,10 +283,10 @@ TransportAirpollutionScenarioABMs/ABMData/
 
 ---
 
-## 13. License
+## 12. License
 This project is licensed under the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-## 14. Contact
+## 13. Contact
 
 For questions, suggestions, or further collaboration, please reach out to:
 - **Name**: Tabea Sonnenschein
