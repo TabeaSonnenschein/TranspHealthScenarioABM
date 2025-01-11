@@ -48,8 +48,6 @@ import random
 import joblib as jl
 import json
 import csv
-
-# my own functions
 import CellAutDisp as CAD
 import Math_utils
 
