@@ -218,6 +218,10 @@ Scenario parameters:
   - `"Remainder"` – Stores partial differences in traffic for subsequent hours.  
   - `"PredictionNoR2"` or `"PredictionR2"` – A final forecast step with or without R² logging.
 
+- `crs` set the Coordinate Reference system. Default is RDNew  `epsg:28992`(appropriate for the Netherlands)
+
+- `cellsize` is the grid cellsize of the Air Pollution and Traffic Grids (default set to 50mx50m) using `cellsize = 50` 
+
 ---
 
 ## 9. Script Structure & Main Components
