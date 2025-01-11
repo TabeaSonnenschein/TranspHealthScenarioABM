@@ -2,7 +2,7 @@
 
 # README
 
-This repository (or script) contains an **Agent-Based Model (ABM)** that simulates individual-level mobility and exposure to air pollution under different urban scenarios. The model uses the **[Mesa](https://github.com/projectmesa/mesa)** library for its ABM framework, **[GeoPandas](https://github.com/geopandas/geopandas)** and **[Shapely](https://github.com/shapely/shapely)** for geographic data handling, and additional libraries for parallelization, route calculation (via **[OSRM](https://project-osrm.org/)**), and data analysis. The primary goal is to estimate traffic behavior and air pollution concentrations on an hourly or sub-hourly basis, and to evaluate how these influence human exposure to NO2.
+This repository (or script) contains an **Agent-Based Model (ABM)** that simulates individual-level mobility and exposure to air pollution under different urban scenarios.  The primary goal is to estimate traffic behavior and air pollution concentrations on an hourly or sub-hourly basis, and to evaluate how these influence human exposure to NO2.
 
 ---
 
@@ -43,7 +43,7 @@ It leverages real-world data (e.g., geospatial building footprints, road network
 - **OSRM-based routing** for bike, drive, walk, or transit modes.  
 - **Conditional route reuse** (caching of frequently traveled routes).
 - **Hourly traffic assignment** to a grid, with optional regression-based or remainder-based approaches to match observed traffic.
-- **In-line** or **hybrid dispersion** calculations for NO2, using customized neighborhood diffusion (via `CellAutDisp`).
+- **hybrid dispersion** calculations for NO2 considering meteorological and morphological dispersion moderators, using cellular automata (via `CellAutDisp`).
 - **Scenario-based** interventions (e.g., no-emission zones, 15-minute city, increased parking fees).
 - **Parallelization** with Python’s `multiprocessing` to handle large agent sets efficiently.
 
@@ -57,7 +57,7 @@ We recommend **Python 3.8** or higher.
 
 ### B) Required Libraries
 
-Below is a list of main libraries used. You can install them via `pip install <library_name>` or create a conda environment if preferred.
+Below is a list of main libraries used. You can install them via `pip install <library_name>` or create a conda environment if preferred. The model uses the **[Mesa](https://github.com/projectmesa/mesa)** library for its ABM framework, **[GeoPandas](https://github.com/geopandas/geopandas)** and **[Shapely](https://github.com/shapely/shapely)** for geographic data handling, and additional libraries for parallelization, route calculation (via **[OSRM](https://project-osrm.org/)**), and data analysis.
 
 1. **[Mesa](https://github.com/projectmesa/mesa)** – for agent-based modeling.
 2. **GeoPandas** – for handling geospatial data.
