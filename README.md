@@ -43,6 +43,7 @@ It leverages real-world data (e.g., geospatial building footprints, road network
 - **Conditional route reuse** (caching of frequently traveled routes).
 - **Hourly traffic assignment** to a grid, with optional regression-based or remainder-based approaches to match observed traffic.
 - **hybrid dispersion** calculations for NO2 considering meteorological and morphological dispersion moderators, using cellular automata (via `CellAutDisp`).
+- **Personal Exposure** to NO2 (depending on activity and mobility patterns) and transport physical activity
 - **Scenario-based** interventions (e.g., no-emission zones, 15-minute city, increased parking fees).
 - **Parallelization** with Python’s `multiprocessing` to handle large agent sets efficiently.
 
