@@ -1,4 +1,4 @@
-# Transport Health Scenario ABM
+# UrbHealth-ABM: Urban Health Scenario Agent-based Model
 
 This repository (or script) contains an **Agent-Based Model (ABM)** that simulates individual-level actvity schedules, mobility choices, resulting traffic and air pollution  and exposure to air pollution and transport related physical activity under different urban scenarios.  This repository contains the ABM model used for the paper "Discovering environmental health effects of transport scenarios through agent-based simulations" published by Environment International. We are planning on adding our data and model input preparation scripts and the output analysis scripts at a later stage.
 
